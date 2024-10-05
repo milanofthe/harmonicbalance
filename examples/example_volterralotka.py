@@ -85,13 +85,13 @@ ax.set_ylabel("prey")
 
 
 
-def spectrum(X):
-    return np.hstack([0.0, X._omegas()]), abs(np.hstack([X.coeff_dc, 0.5*(X.coeffs_cos - 1j*X.coeffs_sin)]))
-
 # # Plot spectrum
+omegas1, amplitudes1 = X1.spectrum()
+omegas2, amplitudes2 = X2.spectrum()
+
 fig, ax = plt.subplots(tight_layout=True)
-ax.plot(*spectrum(X1), "o", label="|X1|")
-ax.plot(*spectrum(X2), "o", label="|X2|")
+ax.plot(omegas1, abs(amplitudes1), "o", label="|X1|")
+ax.plot(omegas2, abs(amplitudes2), "o", label="|X2|")
 ax.legend()
 ax.set_xlabel("omega")
 

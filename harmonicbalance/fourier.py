@@ -222,6 +222,18 @@ class Fourier:
         return self._from_time_domain(func(self._to_time_domain()))
 
 
+    def copy(self):
+        return Fourier(
+            self.coeff_dc,
+            np.copy(self.coeffs_cos),
+            np.copy(self.coeffs_sin),
+            self.omega,
+            self.n
+        )
+
+
+    # methods for evaluation ------------------------------------------------------------------------
+
     def amplitude(self):
 
         #newton parameters
@@ -249,6 +261,12 @@ class Fourier:
         return max(abs(self.evaluate(_times)-self.coeff_dc)) 
 
 
+    def spectrum(self):
+        all_omegas = np.hstack([0.0, self._omegas()])
+        cpx_amplitudes = np.hstack([self.coeff_dc, 0.5*(self.coeffs_cos - 1j*self.coeffs_sin)])
+        return all_omegas, cpx_amplitudes 
+
+
     def fundamental_amplitude(self):
         return np.sqrt(self.coeffs_cos[0]**2 + self.coeffs_sin[0]**2)
 
@@ -258,13 +276,3 @@ class Fourier:
         for c_cos, c_sin, w in zip(self.coeffs_cos, self.coeffs_sin, self._omegas()):
             result_cos_sin += c_cos * np.cos(w*t) + c_sin * np.sin(w*t)
         return self.coeff_dc + result_cos_sin
-
-
-    def copy(self):
-        return Fourier(
-            self.coeff_dc,
-            np.copy(self.coeffs_cos),
-            np.copy(self.coeffs_sin),
-            self.omega,
-            self.n
-        )
