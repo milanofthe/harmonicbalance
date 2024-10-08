@@ -61,6 +61,34 @@ class Fourier:
                f"omega={self.omega}, n={self.n})"
 
 
+    def __gt__(self, other):
+        if isinstance(other, Fourier):
+            return self.amplitude() > other.amplitude()
+        else:
+            return self.amplitude() > other
+
+
+    def __lt__(self, other):
+        if isinstance(other, Fourier):
+            return self.amplitude() < other.amplitude()
+        else:
+            return self.amplitude() < other
+
+
+    def __ge__(self, other):
+        if isinstance(other, Fourier):
+            return self.amplitude() >= other.amplitude()
+        else:
+            return self.amplitude() >= other
+
+
+    def __le__(self, other):
+        if isinstance(other, Fourier):
+            return self.amplitude() <= other.amplitude()
+        else:
+            return self.amplitude() <= other 
+
+
     def __neg__(self):
         return Fourier(
             -self.coeff_dc,
