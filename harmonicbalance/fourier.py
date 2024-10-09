@@ -61,6 +61,11 @@ class Fourier:
                f"omega={self.omega}, n={self.n})"
 
 
+    def __abs__(self):
+        _, amplitudes = self.spectrum()
+        return sum(abs(amplitudes))
+
+
     def __gt__(self, other):
         if isinstance(other, Fourier):
             return self.amplitude() > other.amplitude()
