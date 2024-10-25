@@ -64,7 +64,7 @@ X0 = U.copy()
 X_sol, _sol = fouriersolve(residual_duffing, X0, method="hybr")
 ```
 
-    runtime of 'fouriersolve' : 8.287800010293722 ms
+    runtime of 'fouriersolve' : 8.376600017072633 ms
     
 
 
@@ -78,14 +78,17 @@ print(X_sol)
      -1.75997843e-02], omega=1, n=5)
     
 
-The `Fourier` class also implements some methods for easy time domain evaluation, which we can use to plot the time domain response and the trajectory in the phase space.
+The `Fourier` class also implements the `__call__` method for direct time domain evaluation of the fourier series. We can use it to plot the time domain response and the trajectory in the phase space.
 
 
 ```python
 # Evaluate the solution
 t = np.linspace(0, X_sol._T(), 1000)
-x = X_sol.evaluate(t) 
-v = X_sol.dt().evaluate(t)
+x = X_sol(t) 
+
+#compute derivative
+V_sol = X_sol.dt()
+v = V_sol(t)
 ```
 
 
@@ -161,26 +164,21 @@ PCS = PredictorCorrectorSolver(residual_duffing,
 solutions = PCS.solve()
 ```
 
-    runtime of 'fouriersolve' : 3.76180000603199 ms
-    runtime of 'fouriersolve_arclength' : 7.269800000358373 ms
-    runtime of 'fouriersolve_arclength' : 3.193200012901798 ms
-    runtime of 'fouriersolve_arclength' : 3.3368000003974885 ms
-    runtime of 'fouriersolve_arclength' : 3.2796000014059246 ms
-    runtime of 'fouriersolve_arclength' : 5.24779999977909 ms
-    runtime of 'fouriersolve_arclength' : 2.8682000120170414 ms
-    runtime of 'fouriersolve_arclength' : 3.1549999839626253 ms
-    runtime of 'fouriersolve_arclength' : 2.5322000146843493 ms
+    runtime of 'fouriersolve' : 4.0203999960795045 ms
+    runtime of 'fouriersolve_arclength' : 7.343000004766509 ms
+    runtime of 'fouriersolve_arclength' : 2.84909998299554 ms
+    runtime of 'fouriersolve_arclength' : 3.654200001619756 ms
+    runtime of 'fouriersolve_arclength' : 2.914099983172491 ms
+    runtime of 'fouriersolve_arclength' : 5.299399985233322 ms
+    runtime of 'fouriersolve_arclength' : 2.90099999983795 ms
     ...
-    runtime of 'fouriersolve_arclength' : 2.52320000436157 ms
-    runtime of 'fouriersolve_arclength' : 2.9667999770026654 ms
-    runtime of 'fouriersolve_arclength' : 2.8286000015214086 ms
-    runtime of 'fouriersolve_arclength' : 2.748700004303828 ms
-    runtime of 'fouriersolve_arclength' : 2.693699992960319 ms
-    runtime of 'fouriersolve_arclength' : 2.8055000002495944 ms
-    runtime of 'fouriersolve_arclength' : 2.5415999989490956 ms
-    runtime of 'fouriersolve_arclength' : 2.5228000013157725 ms
-    runtime of 'fouriersolve_arclength' : 2.8282999992370605 ms
-    runtime of 'solve' : 676.1675999732688 ms
+    runtime of 'fouriersolve_arclength' : 3.353200008859858 ms
+    runtime of 'fouriersolve_arclength' : 2.4682999937795103 ms
+    runtime of 'fouriersolve_arclength' : 2.695200004382059 ms
+    runtime of 'fouriersolve_arclength' : 2.4750000156927854 ms
+    runtime of 'fouriersolve_arclength' : 2.465700003085658 ms
+    runtime of 'fouriersolve_arclength' : 2.600799984065816 ms
+    runtime of 'solve' : 671.3208000001032 ms
     
 
 
@@ -190,10 +188,10 @@ specific_omega = 3
 specific_solutions = PCS.solve_specific(specific_omega)
 ```
 
-    runtime of 'fouriersolve' : 5.1580999861471355 ms
-    runtime of 'fouriersolve' : 2.6697000139392912 ms
-    runtime of 'fouriersolve' : 2.2250000038184226 ms
-    runtime of 'solve_specific' : 10.776999988593161 ms
+    runtime of 'fouriersolve' : 4.626699985237792 ms
+    runtime of 'fouriersolve' : 3.0014999792911112 ms
+    runtime of 'fouriersolve' : 2.1920999861322343 ms
+    runtime of 'solve_specific' : 12.803199992049485 ms
     
 
 

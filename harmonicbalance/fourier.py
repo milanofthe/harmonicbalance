@@ -115,6 +115,10 @@ class Fourier:
                f"omega={self.omega}, n={self.n})"
 
 
+    def __call__(self, t):
+        return self.evaluate(t)
+
+
     def __abs__(self):
         _, amplitudes = self.spectrum()
         return sum(abs(amplitudes))
@@ -306,6 +310,7 @@ class Fourier:
 
 
     def nonlinearity(self, func):
+        #apply a generic nonlinearity defined by callable 'func'
         return self._from_time_domain(func(self._to_time_domain()))
 
 

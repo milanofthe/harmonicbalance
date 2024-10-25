@@ -10,7 +10,7 @@ m, c, d, g, p = 1.0, 2.0, 0.3, 1.4, 5.0
 
 
 #excitation
-U = Fourier(omega=1, n=7) 
+U = Fourier(omega=1, n=5) 
 U[1] = 1 #fundamental frequency cos term
 
 
@@ -25,14 +25,13 @@ X0 = U.copy()
 
 # solve -> minimize residual
 X_sol, _sol = fouriersolve(residual_duffing, X0, method="hybr", use_jac=False)
-# X_sol, _sol = fouriersolve(residual_duffing, X0, method="krylov", use_jac=False)
-
 print(_sol)
+
 
 # Evaluate the solution
 t_values = np.linspace(0, X_sol._T(), 1000)
-x_values = X_sol.evaluate(t_values) 
-v_values = X_sol.dt().evaluate(t_values)
+x_values = X_sol(t_values) 
+v_values = X_sol.dt()(t_values) # velocity is derivative
 
 
 # Plot the solution (time domain)

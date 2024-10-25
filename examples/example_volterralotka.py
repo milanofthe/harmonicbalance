@@ -46,8 +46,8 @@ print(X1.omega)
 
 # Evaluate the solution
 t_values = np.linspace(0, X1._T(), 1000)
-x1_values = X1.evaluate(t_values) 
-x2_values = X2.evaluate(t_values)
+x1_values = X1(t_values) 
+x2_values = X2(t_values)
 
 
 # Reference solution

@@ -28,8 +28,8 @@ print(X_sol.omega)
 
 # Evaluate the solution
 t_values = np.linspace(0, X_sol._T(), 5000)
-x_values = X_sol.evaluate(t_values) 
-v_values = X_sol.dt().evaluate(t_values)
+x_values = X_sol(t_values) 
+v_values = X_sol.dt()(t_values)
 
 
 #initial condition for ODE

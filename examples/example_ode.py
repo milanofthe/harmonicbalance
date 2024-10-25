@@ -31,8 +31,8 @@ print(_sol)
 
 # Evaluate the solution
 t_values = np.linspace(0, X_sol._T(), 1000)
-x_values = X_sol.evaluate(t_values) 
-v_values = V_sol.evaluate(t_values)
+x_values = X_sol(t_values) 
+v_values = V_sol(t_values)
 
 
 # Plot the solution (time domain)

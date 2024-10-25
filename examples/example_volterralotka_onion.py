@@ -65,12 +65,8 @@ ax.plot(x1_dc, x2_dc, ".", label="equilibrium")
 for X1, X2 in solutions:
 
     # Evaluate the solution
-    t_values = np.linspace(0, X1._T(), 1000)
-    
-    x1_values = X1.evaluate(t_values) 
-    x2_values = X2.evaluate(t_values)
-    
-    ax.plot(x1_values, x2_values, "-")
+    t = np.linspace(0, X1._T(), 1000)    
+    ax.plot(X1(t), X2(t), "-")
 
 
 ax.axvline(0.0, color="k")
