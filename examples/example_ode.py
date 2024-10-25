@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from harmonicbalance.fourier import Fourier
-from harmonicbalance.solvers import fouriersolve
+from harmonicbalance.solvers import fouriersolve_ode
 
 
 #duffing parameters 
@@ -14,25 +14,25 @@ U = Fourier(omega=1, n=7)
 U[1] = 1 #fundamental frequency cos term
 
 
-#residual for duffing oscillator
-def residual_duffing(X):
-    return  m * X.dt().dt() + c * X.dt() + d * X + g * X**3 - p * U
+#right hand side of duffing ode
+def ode_duffing(X):
+    return [X[1], -c/m * X[1] - d/m * X[0] - g/m * X[0]**3 + p * U]
 
 
 #initial guess (just use the excitation)
-X0 = U.copy()
+X0s = [U.copy().dt(), U.copy()]
 
 
 # solve -> minimize residual
-X_sol, _sol = fouriersolve(residual_duffing, X0, method="hybr", use_jac=False)
-# X_sol, _sol = fouriersolve(residual_duffing, X0, method="krylov", use_jac=False)
+[X_sol, V_sol], _sol = fouriersolve_ode(ode_duffing, X0s, method="lm", use_jac=False)
+
 
 print(_sol)
 
 # Evaluate the solution
 t_values = np.linspace(0, X_sol._T(), 1000)
 x_values = X_sol.evaluate(t_values) 
-v_values = X_sol.dt().evaluate(t_values)
+v_values = V_sol.evaluate(t_values)
 
 
 # Plot the solution (time domain)

@@ -1,5 +1,5 @@
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
 from harmonicbalance.fourier import Fourier
@@ -19,7 +19,7 @@ X0[1] = 5  # Fundamental frequency cos term
 
 
 # solve -> minimize residual
-X_sol, _sol = fouriersolve_autonomous(residual_vanderpol, X0, method="lm", use_jac=False)
+X_sol, _sol = fouriersolve_autonomous(residual_vanderpol, X0, method="lm", use_jac=True)
 
 print(_sol)
 
@@ -52,7 +52,6 @@ ax.plot(t_values, x_ref[::-1], "--")
 ax.plot(t_values, v_ref[::-1], "--")
 ax.set_xlabel("Time")
 ax.set_ylabel("Response")
-
 
 
 # Plot the solution (phase diagram)

@@ -1,7 +1,5 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
-
 
 from harmonicbalance.predictorcorrector import PredictorCorrectorSolver
 from harmonicbalance.fourier import Fourier
@@ -31,7 +29,7 @@ PCS = PredictorCorrectorSolver(residual_duffing,
                                alpha_end=5, 
                                alpha_step=0.1, 
                                use_jac=False, 
-                               method="hybr")
+                               method="krylov")
 
 #find solutions in range
 PCS.solve()

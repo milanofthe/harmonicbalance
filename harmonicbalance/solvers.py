@@ -12,7 +12,7 @@ import numpy as np
 from scipy.optimize import root, minimize
 from time import perf_counter
 
-from .fourier import fourier_from_params, fourier_from_coeffs
+from .fourier import Fourier
 
 
 # helper ============================================================================================
@@ -84,7 +84,7 @@ def fouriersolve(residual_func, X0, use_jac=True, **solverargs):
     
     #wrapper for fourier coefficients
     def residual_func_num(X_coeffs):
-        X = fourier_from_coeffs(X_coeffs, X0.omega)
+        X = Fourier.from_coeffs(X_coeffs, X0.omega)
         R = residual_func(X)
         return R.coeffs()
 
@@ -94,7 +94,7 @@ def fouriersolve(residual_func, X0, use_jac=True, **solverargs):
     #actual solver call
     _sol = root(residual_func_num, X0.coeffs(), jac=residual_func_num_jac, **solverargs)
 
-    return fourier_from_coeffs(_sol.x, X0.omega), _sol
+    return Fourier.from_coeffs(_sol.x, X0.omega), _sol
 
 
 @timer
@@ -111,7 +111,7 @@ def fouriersolve_autonomous(residual_func, X0, use_jac=False, **solverargs):
 
     #wrapper for fourier coefficients
     def residual_func_num(params):
-        X = fourier_from_params(params)
+        X = Fourier.from_params(params)
         R = residual_func(X)
         return np.append(R.coeffs(), 0.0)
 
@@ -122,7 +122,7 @@ def fouriersolve_autonomous(residual_func, X0, use_jac=False, **solverargs):
     _sol = root(residual_func_num, X0.params(), jac=residual_func_num_jac, **solverargs)
 
     #return fourier object from solution
-    return fourier_from_params(_sol.x), _sol
+    return Fourier.from_params(_sol.x), _sol
 
 
 @timer
@@ -140,7 +140,7 @@ def fouriersolve_autonomous_trajectory(residual_func, X0, use_jac=False, **solve
 
     #wrapper for fourier coefficients
     def residual_func_num(params):
-        X = fourier_from_params(params)
+        X = Fourier.from_params(params)
         R = residual_func(X)
         tr = (X-X0).evaluate(0.0)**2 # trajectory
         return np.append(R.coeffs(), tr)
@@ -152,7 +152,7 @@ def fouriersolve_autonomous_trajectory(residual_func, X0, use_jac=False, **solve
     _sol = root(residual_func_num, X0.params(), jac=residual_func_num_jac, **solverargs)
 
     #return fourier object from solution
-    return fourier_from_params(_sol.x), _sol
+    return Fourier.from_params(_sol.x), _sol
 
 
 @timer
@@ -174,7 +174,7 @@ def fouriersolve_arclength(residual_func, X0, Xref, ds, use_jac=True, **solverar
 
     #wrapper for fourier coefficients
     def residual_func_num(params):
-        X = fourier_from_params(params)
+        X = Fourier.from_params(params)
         R = residual_func(X)
 
         #use all params for arclength
@@ -189,7 +189,62 @@ def fouriersolve_arclength(residual_func, X0, Xref, ds, use_jac=True, **solverar
     _sol = root(residual_func_num, X0.params(), jac=residual_func_num_jac, **solverargs)
 
     #return fourier object from solution
-    return fourier_from_params(_sol.x), _sol
+    return Fourier.from_params(_sol.x), _sol
+
+
+@timer
+def fouriersolve_ode(ode_func, X0s, use_jac=False, **solverargs):
+    """
+    Wrapper for scipy root solver to handle 'Fourier' objects directly. 
+    Instead of the residual, this function wraps the right hand side of 
+    an ODE and constructs the residual function from it.
+
+    extended to be applicable to coupled equations
+
+    INPUTS:
+        ode_func : (callable) right hand side function of ode 
+        X0s      : (list[Fourier]) initial guesses for each variable
+        use_jac  : (bool) use numerical central differences jacobian for solver
+    """
+
+    #number of fourier variables
+    nx = len(X0s)
+    omega = X0s[0].omega
+
+    #define residual func from ode_func
+    def residual_func(Xs):
+
+        #evaluate ode_func
+        dXs = ode_func(Xs)
+
+        #build residuals  dx/dt - func(x) = 0
+        return [x.dt() - dx for x, dx in zip(Xs, dXs)]
+
+    #wrapper for fourier coefficients
+    def residual_func_num(coeffs):
+
+        #set fourier objects from paramsters
+        Xs = [Fourier.from_coeffs(cs, omega) for cs in np.split(coeffs, nx)]
+
+        #residuals as fourier objects
+        Rs = residual_func(Xs)
+
+        #conversion to coefficients
+        return np.hstack([r.coeffs() for r in Rs])
+
+    #numerical jacobian using central differences
+    residual_func_num_jac = auto_jacobian(residual_func_num) if use_jac else None
+
+    #initial parameters
+    initial_coeffs = np.hstack([x.coeffs() for x in X0s])
+
+    #actual solver call
+    _sol = root(residual_func_num, initial_coeffs, jac=residual_func_num_jac, **solverargs)
+    
+    #set coefficients and frequency for each variable
+    Xs = [Fourier.from_coeffs(cs, omega) for cs in np.split(_sol.x, nx)]
+
+    return Xs, _sol
 
 
 @timer
@@ -218,7 +273,7 @@ def fouriersolve_multi_autonomous_trajectory(residual_func, X0s, Xrefs, use_jac=
         coeffs, omega = params[:-1], params[-1]
 
         #set fourier objects from paramsters
-        Xs = [fourier_from_coeffs(cs, omega) for cs in np.split(coeffs, nx)]
+        Xs = [Fourier.from_coeffs(cs, omega) for cs in np.split(coeffs, nx)]
 
         #residual component of trajectory enforcement
         tr = sum([(x - xr).evaluate(0.0)**2 for x, xr in zip(Xs, Xrefs)])
@@ -245,6 +300,6 @@ def fouriersolve_multi_autonomous_trajectory(residual_func, X0s, Xrefs, use_jac=
     coeffs, omega = _sol.x[:-1], _sol.x[-1]
 
     #set coefficients and frequency for each variable
-    Xs = [fourier_from_coeffs(cs, omega) for cs in np.split(coeffs, nx)]
+    Xs = [Fourier.from_coeffs(cs, omega) for cs in np.split(coeffs, nx)]
 
     return Xs, _sol

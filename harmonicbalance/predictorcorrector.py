@@ -12,7 +12,7 @@ import numpy as np
 
 import scipy
 
-from .fourier import Fourier, fourier_from_coeffs, fourier_from_params
+from .fourier import Fourier
 from .solvers import fouriersolve, fouriersolve_arclength, numerical_jacobian, timer
 
 
@@ -85,7 +85,7 @@ class PredictorCorrectorSolver:
         params = X1.params() + self.alpha_step * dX / np.linalg.norm(dX)
 
         #set parameters
-        return fourier_from_params(params)
+        return Fourier.from_params(params)
 
 
     @timer
@@ -102,7 +102,7 @@ class PredictorCorrectorSolver:
                 
         #initial predictor step (direction is decided here)
         omega_pred = self.X0.omega + 0.5 * self.alpha_step * self.direction
-        X_pred = fourier_from_coeffs(X.coeffs(), omega_pred)
+        X_pred = Fourier.from_coeffs(X.coeffs(), omega_pred)
 
         #previous solution for arclength enforcement
         X_prev = X.copy()

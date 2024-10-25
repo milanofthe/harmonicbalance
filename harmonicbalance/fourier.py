@@ -12,20 +12,6 @@ import numpy as np
 from time import perf_counter
 
 
-# FACTORY FUNCTIONS =================================================================================
-
-def fourier_from_params(params):
-    n = int((len(params)-2)/2)
-    c_dc, c_cos, c_sin, omega = np.split(params, [1, n+1, 2*n+1])
-    return Fourier(c_dc[0], c_cos, c_sin, omega[0], n)
-
-
-def fourier_from_coeffs(coeffs, omega):
-    n = int((len(coeffs)-1)/2 )
-    c_dc, c_cos, c_sin = np.split(coeffs, [1, n+1])
-    return Fourier(c_dc[0], c_cos, c_sin, omega, n)
-
-
 # FOURIER CLASS =====================================================================================
 
 class Fourier:
@@ -291,12 +277,13 @@ class Fourier:
             _times += dx / ddX.evaluate(_times)
                 
         #find maximum after dc removal
-        return max(abs(self.evaluate(_times)-self.coeff_dc)) 
+        return max(abs(self.evaluate(_times)-self.coeff_dc))
 
 
     def spectrum(self):
         all_omegas = np.hstack([0.0, self._omegas()])
-        cpx_amplitudes = np.hstack([self.coeff_dc, 0.5*(self.coeffs_cos - 1j*self.coeffs_sin)])
+        # cpx_amplitudes = np.hstack([self.coeff_dc, 0.5*(self.coeffs_cos - 1j*self.coeffs_sin)])
+        cpx_amplitudes = np.hstack([self.coeff_dc, self.coeffs_cos - 1j*self.coeffs_sin])
         return all_omegas, cpx_amplitudes 
 
 
@@ -309,3 +296,40 @@ class Fourier:
         for c_cos, c_sin, w in zip(self.coeffs_cos, self.coeffs_sin, self._omegas()):
             result_cos_sin += c_cos * np.cos(w*t) + c_sin * np.sin(w*t)
         return self.coeff_dc + result_cos_sin
+
+
+    # factory methods -------------------------------------------------------------------------------
+
+    @classmethod
+    def from_coeffs(cls, coeffs, omega):
+        n = int((len(coeffs)-1)/2 )
+        c_dc, c_cos, c_sin = np.split(coeffs, [1, n+1])
+        return cls(c_dc[0], c_cos, c_sin, omega, n)
+
+
+    @classmethod
+    def from_params(cls, params):
+        n = int((len(params)-2)/2)
+        c_dc, c_cos, c_sin, omega = np.split(params, [1, n+1, 2*n+1])
+        return cls(c_dc[0], c_cos, c_sin, omega[0], n)
+
+
+# LOCAL TESTING =====================================================================================
+
+if __name__ == "__main__":
+    
+    import matplotlib.pyplot as plt
+
+    X = Fourier(n=50, omega=1)
+    X[1] = 1
+
+    om, am = X.spectrum()
+    plt.plot(om, abs(am), "o")
+    plt.show()
+
+    for _ in range(10):
+        X = X**3
+
+        om, am = X.spectrum()
+        plt.plot(om, abs(am), "o")
+        plt.show()
