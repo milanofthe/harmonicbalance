@@ -1,4 +1,4 @@
-# Harmonic Balance implementation
+# Harmonic Balance 
 
 This is a minimalistic framework for solving periodic steady state and limit cycles of nonlinear dynamic systems using the harmonic balance method.
 At the core is a `Fourier` class that represents a fourier series and implements basic operators such as addition, and multiplication as well as general nonlinearities and time domain differentiation.
@@ -6,12 +6,36 @@ This enables an easy formulation of the residual function of the nonlinear dynam
 
 There are a lot of common examples for nonlinear dynamical systems in the `examples` directory.
 
+## The Fourier Class
+
+The heart of this minimalistic framework is the `Fourier` class in `harmonicbalance.fourier`. The class implements the common arithmetic operations such as `__add__`, `__sub__`, `__mul__`, etc. The operations are implemented in such a way that they transform the time domain signal that is represented by a set of fourier coefficiencts. For arbitrary nonlinear operations such as `__pow__`, etc. the signal is constructed in the time domain from the fourier coefficients using numpys efficient `ifft`. 
+
+In short, all the mess of harmonic balance residual function setup and transfer between frequency- and time-domain is naturally handled by the fourier objects.
+
+The fourier coefficients are internally present in the real valued configuration with DC, cos and sin components. Like this:
+
+```python
+coeffs = [coeff_dc, *coeffs_cos, *coeffs_sin]
+```
+
+
+This allows the use of the powerfull optimizers from the `scipy.optim` library.
+
 ## Example Duffing Oscillator
 For example, lets solve the steady state of the driven duffing oscillator which is a basic damped oscillator with an additional cubic stiffness ($g$) term.
 
 $$
 m \ddot{x} + c \dot{x} + dx + g x^3 = p \cos(\omega_0 t)
 $$
+
+In the harmonic balance world, the residual will look like this:
+
+$$
+r(x) = m \ddot{x} + c \dot{x} + dx + g x^3 - p \cos(\omega_0 t)
+$$
+
+When $r$ is zero (or numerically close to zero) we know that $x$ satisfies the duffing ODE and therefore must be a solution. 
+
 
 
 ```python
@@ -40,7 +64,7 @@ X0 = U.copy()
 X_sol, _sol = fouriersolve(residual_duffing, X0, method="hybr")
 ```
 
-    runtime of 'fouriersolve' : 8.30149999819696 ms
+    runtime of 'fouriersolve' : 8.257699984824285 ms
     
 
 
@@ -79,7 +103,7 @@ ax.set_ylabel("Response");
 
 
     
-![png](README_files/README_6_0.png)
+![png](README_files/README_7_0.png)
     
 
 
@@ -96,7 +120,7 @@ ax.set_ylabel("v");
 
 
     
-![png](README_files/README_7_0.png)
+![png](README_files/README_8_0.png)
     
 
 
@@ -137,25 +161,19 @@ PCS = PredictorCorrectorSolver(residual_duffing,
 solutions = PCS.solve()
 ```
 
-    runtime of 'fouriersolve' : 3.5116998478770256 ms
-    runtime of 'fouriersolve_arclength' : 7.075299974530935 ms
-    runtime of 'fouriersolve_arclength' : 2.8400998562574387 ms
-    runtime of 'fouriersolve_arclength' : 3.4962999634444714 ms
-    runtime of 'fouriersolve_arclength' : 2.8699999675154686 ms
-    runtime of 'fouriersolve_arclength' : 4.9443000461906195 ms
-    runtime of 'fouriersolve_arclength' : 2.8006997890770435 ms
-    runtime of 'fouriersolve_arclength' : 5.312999943271279 ms
+    runtime of 'fouriersolve' : 4.071000003023073 ms
+    runtime of 'fouriersolve_arclength' : 6.971499999053776 ms
+    runtime of 'fouriersolve_arclength' : 2.7922000153921545 ms
+    runtime of 'fouriersolve_arclength' : 3.6125999758951366 ms
+    runtime of 'fouriersolve_arclength' : 2.9405000095721334 ms
     ...
-    runtime of 'fouriersolve_arclength' : 4.789300030097365 ms
-    runtime of 'fouriersolve_arclength' : 4.773000022396445 ms
-    runtime of 'fouriersolve_arclength' : 6.96209981106
-    runtime of 'fouriersolve_arclength' : 2.503999974578619 ms
-    runtime of 'fouriersolve_arclength' : 2.495999913662672 ms
-    runtime of 'solve' : 648.698000004515 ms
+    runtime of 'fouriersolve_arclength' : 2.671800000825897 ms
+    runtime of 'fouriersolve_arclength' : 2.7083000168204308 ms
+    runtime of 'fouriersolve_arclength' : 2.909000002546236 ms
+    runtime of 'fouriersolve_arclength' : 2.6077000075019896 ms
+    runtime of 'fouriersolve_arclength' : 2.793399995425716 ms
+    runtime of 'solve' : 670.6766000133939 ms
     
-
-
-
 
 
 ```python
@@ -164,10 +182,10 @@ specific_omega = 3
 specific_solutions = PCS.solve_specific(specific_omega)
 ```
 
-    runtime of 'fouriersolve' : 4.860799992457032 ms
-    runtime of 'fouriersolve' : 3.131199860945344 ms
-    runtime of 'fouriersolve' : 2.359899925068021 ms
-    runtime of 'solve_specific' : 10.667799971997738 ms
+    runtime of 'fouriersolve' : 4.574399994453415 ms
+    runtime of 'fouriersolve' : 2.503299998352304 ms
+    runtime of 'fouriersolve' : 2.2751000069547445 ms
+    runtime of 'solve_specific' : 9.798999992199242 ms
     
 
 
@@ -189,6 +207,7 @@ ax.set_ylabel("Amplitude");
 
 
     
-![png](README_files/README_11_0.png)
+![png](README_files/README_12_0.png)
     
+
 
