@@ -8,7 +8,7 @@ There are a lot of common examples for nonlinear dynamical systems in the `examp
 
 ## The Fourier Class
 
-The heart of this minimalistic framework is the `Fourier` class in `harmonicbalance.fourier`. The class implements the common arithmetic operations such as `__add__`, `__sub__`, `__mul__`, etc. The operations are implemented in such a way that they transform the time domain signal that is represented by a set of fourier coefficiencts. For arbitrary nonlinear operations such as `__pow__`, etc. the signal is constructed in the time domain from the fourier coefficients using numpys efficient `ifft`. 
+The heart of this minimalistic framework is the `Fourier` class in `harmonicbalance.fourier`. The class implements the common arithmetic operations such as `__add__`, `__sub__`, `__mul__`, etc. The operations are implemented in such a way that they transform the time domain signal that is represented by a set of fourier coefficiencts. For arbitrary nonlinear operations such as `__pow__`, etc. the signal is constructed in the time domain from the fourier coefficients using numpys efficient `ifft`. There are also a lot of common nonlinearities implemented using a decorator approach so they can be interfaced by numpys ufunc system.
 
 In short, all the mess of harmonic balance residual function setup and transfer between frequency- and time-domain is naturally handled by the fourier objects.
 
@@ -64,7 +64,7 @@ X0 = U.copy()
 X_sol, _sol = fouriersolve(residual_duffing, X0, method="hybr")
 ```
 
-    runtime of 'fouriersolve' : 8.257699984824285 ms
+    runtime of 'fouriersolve' : 9.228100010659546 ms
     
 
 
@@ -91,7 +91,7 @@ v = X_sol.dt().evaluate(t)
 
 ```python
 # Plot the solution (time domain)
-fig, ax = plt.subplots(tight_layout=True, figsize=(8,5), dpi=120)
+fig, ax = plt.subplots(tight_layout=True, figsize=(8,4), dpi=120)
 
 ax.plot(t, x, label="x")
 ax.plot(t, v, label="v")
@@ -110,7 +110,7 @@ ax.set_ylabel("Response");
 
 ```python
 # Plot the solution (phase diagram)
-fig, ax = plt.subplots(tight_layout=True, figsize=(8,5), dpi=120)
+fig, ax = plt.subplots(tight_layout=True, figsize=(6,4), dpi=120)
 
 ax.plot(x, v)
 
@@ -161,18 +161,21 @@ PCS = PredictorCorrectorSolver(residual_duffing,
 solutions = PCS.solve()
 ```
 
-    runtime of 'fouriersolve' : 4.071000003023073 ms
-    runtime of 'fouriersolve_arclength' : 6.971499999053776 ms
-    runtime of 'fouriersolve_arclength' : 2.7922000153921545 ms
-    runtime of 'fouriersolve_arclength' : 3.6125999758951366 ms
-    runtime of 'fouriersolve_arclength' : 2.9405000095721334 ms
+    runtime of 'fouriersolve' : 4.2195999994874 ms
+    runtime of 'fouriersolve_arclength' : 6.7857000103686005 ms
+    runtime of 'fouriersolve_arclength' : 3.843500016955659 ms
+    runtime of 'fouriersolve_arclength' : 3.7250999885145575 ms
+    runtime of 'fouriersolve_arclength' : 2.9832000145688653 ms
+    runtime of 'fouriersolve_arclength' : 5.243299994617701 ms
+    runtime of 'fouriersolve_arclength' : 2.9935000056866556 ms
     ...
-    runtime of 'fouriersolve_arclength' : 2.671800000825897 ms
-    runtime of 'fouriersolve_arclength' : 2.7083000168204308 ms
-    runtime of 'fouriersolve_arclength' : 2.909000002546236 ms
-    runtime of 'fouriersolve_arclength' : 2.6077000075019896 ms
-    runtime of 'fouriersolve_arclength' : 2.793399995425716 ms
-    runtime of 'solve' : 670.6766000133939 ms
+    runtime of 'fouriersolve_arclength' : 3.323700017062947 ms
+    runtime of 'fouriersolve_arclength' : 2.7794000052381307 ms
+    runtime of 'fouriersolve_arclength' : 2.6732999831438065 ms
+    runtime of 'fouriersolve_arclength' : 2.5305999733973294 ms
+    runtime of 'fouriersolve_arclength' : 2.4760999949648976 ms
+    runtime of 'fouriersolve_arclength' : 2.7956999838352203 ms
+    runtime of 'solve' : 665.9826000104658 ms
     
 
 
@@ -182,16 +185,16 @@ specific_omega = 3
 specific_solutions = PCS.solve_specific(specific_omega)
 ```
 
-    runtime of 'fouriersolve' : 4.574399994453415 ms
-    runtime of 'fouriersolve' : 2.503299998352304 ms
-    runtime of 'fouriersolve' : 2.2751000069547445 ms
-    runtime of 'solve_specific' : 9.798999992199242 ms
+    runtime of 'fouriersolve' : 4.511299979640171 ms
+    runtime of 'fouriersolve' : 2.782600000500679 ms
+    runtime of 'fouriersolve' : 2.450100000714883 ms
+    runtime of 'solve_specific' : 9.979099995689467 ms
     
 
 
 ```python
 #plot the solution (phase diagram)
-fig, ax = plt.subplots(tight_layout=True, figsize=(8,5), dpi=120)
+fig, ax = plt.subplots(tight_layout=True, figsize=(8,4), dpi=120)
 
 #solution curve
 ax.plot([s.omega for s in PCS.solutions], [s.amplitude() for s in solutions], ".-")
@@ -209,5 +212,3 @@ ax.set_ylabel("Amplitude");
     
 ![png](README_files/README_12_0.png)
     
-
-

@@ -10,10 +10,78 @@
 
 import numpy as np
 from time import perf_counter
+import functools
+
+
+# NUMPY FUNCTIONS ===================================================================================
+
+FUNCS = [
+    # Trigonometric functions
+    np.sin,
+    np.cos, 
+    np.tan, 
+    np.arcsin, 
+    np.arccos,
+    np.arctan,
+    np.sinh,
+    np.cosh,
+    np.tanh,
+    np.arcsinh, 
+    np.arccosh,
+    np.arctanh,
+
+    # Exponential and logarithmic functions
+    np.exp,
+    np.exp2,  
+    np.log, 
+    np.log2,  
+    np.log10,
+    np.log1p,
+    np.expm1,
+
+    # Power functions
+    np.sqrt, 
+    np.square, 
+    np.power, 
+    np.cbrt, 
+
+    # Complex functions
+    np.real, 
+    np.imag, 
+    np.conj, 
+    np.abs, 
+    np.angle, 
+
+    # Statistical functions
+    np.sign,
+    ]
+
+
+# WRAPPER THAT ADDS ADDITIONAL NONLINEARITIES =======================================================
+
+def add_funcs(cls):
+    """
+    Decorator that adds numpy functions as methods to the 'Fourier' class as 
+    additional nonlinearities, utilizes the 'nonlinearity' method.
+
+    Makes the 'Fourier' class compatible with the basic numpy ufuncs.
+    """
+    def create_method(fnc):
+        @functools.wraps(fnc)
+        def method(self):
+            return self.nonlinearity(fnc)
+        return method
+
+    # Add methods to class
+    for fnc in FUNCS:
+        if not hasattr(cls, fnc.__name__):
+            setattr(cls, fnc.__name__, create_method(fnc))
+    return cls
 
 
 # FOURIER CLASS =====================================================================================
 
+@add_funcs
 class Fourier:
 
     """
@@ -282,7 +350,6 @@ class Fourier:
 
     def spectrum(self):
         all_omegas = np.hstack([0.0, self._omegas()])
-        # cpx_amplitudes = np.hstack([self.coeff_dc, 0.5*(self.coeffs_cos - 1j*self.coeffs_sin)])
         cpx_amplitudes = np.hstack([self.coeff_dc, self.coeffs_cos - 1j*self.coeffs_sin])
         return all_omegas, cpx_amplitudes 
 
@@ -320,16 +387,16 @@ if __name__ == "__main__":
     
     import matplotlib.pyplot as plt
 
-    X = Fourier(n=50, omega=1)
+    X = Fourier(n=500, omega=1)
     X[1] = 1
+
+    Y = np.sin(X)
+
+    print(X, Y)
 
     om, am = X.spectrum()
     plt.plot(om, abs(am), "o")
+
+    om, am = Y.spectrum()
+    plt.plot(om, abs(am), "o")
     plt.show()
-
-    for _ in range(10):
-        X = X**3
-
-        om, am = X.spectrum()
-        plt.plot(om, abs(am), "o")
-        plt.show()

@@ -9,8 +9,12 @@ g, L = 9.81, 1.0
 omega = np.sqrt(g / L)
 
 # Residual function
+# def residual_pendulum(Theta):
+#     return Theta.dt().dt() + (g / L) * Theta.nonlinearity(np.sin)
+
+# Residual function using numpy ufunc interface
 def residual_pendulum(Theta):
-    return Theta.dt().dt() + (g / L) * Theta.nonlinearity(np.sin)
+    return Theta.dt().dt() + (g / L) * np.sin(Theta)
 
 # Initial guess
 X0 = Fourier(omega=omega, n=20)
