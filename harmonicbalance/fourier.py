@@ -9,7 +9,6 @@
 # IMPORTS ===========================================================================================
 
 import numpy as np
-from time import perf_counter
 import functools
 
 
@@ -116,40 +115,39 @@ class Fourier:
 
 
     def __call__(self, t):
-        return self.evaluate(t)
+        return self._evaluate(t)
 
 
     def __abs__(self):
-        _, amplitudes = self.spectrum()
-        return sum(abs(amplitudes))
+        return self._amplitude()
 
 
     def __gt__(self, other):
         if isinstance(other, Fourier):
-            return self.amplitude() > other.amplitude()
+            return self._amplitude() > other._amplitude()
         else:
-            return self.amplitude() > other
+            return self._amplitude() > other
 
 
     def __lt__(self, other):
         if isinstance(other, Fourier):
-            return self.amplitude() < other.amplitude()
+            return self._amplitude() < other._amplitude()
         else:
-            return self.amplitude() < other
+            return self._amplitude() < other
 
 
     def __ge__(self, other):
         if isinstance(other, Fourier):
-            return self.amplitude() >= other.amplitude()
+            return self._amplitude() >= other._amplitude()
         else:
-            return self.amplitude() >= other
+            return self._amplitude() >= other
 
 
     def __le__(self, other):
         if isinstance(other, Fourier):
-            return self.amplitude() <= other.amplitude()
+            return self._amplitude() <= other._amplitude()
         else:
-            return self.amplitude() <= other 
+            return self._amplitude() <= other 
 
 
     def __neg__(self):
@@ -326,31 +324,31 @@ class Fourier:
 
     # methods for evaluation ------------------------------------------------------------------------
 
-    def amplitude(self):
+    def _amplitude(self):
 
         #newton parameters
         max_iterations = 200
-        tolerance = 1e-4
+        tolerance = 1e-5
 
         #first and second derivative for finding extrema with newton
         dX, ddX = self.dt(), self.dt().dt()
 
         #evaluation points
-        _times = np.linspace(0, self._T(), 2*self.n)
+        _times = np.linspace(0, self._T(), 5*self.n)
 
         #vectorized newton iterations until convergence
         for _ in range(max_iterations):
-            dx = dX.evaluate(_times)
+            dx = dX._evaluate(_times)
             
             #check for convergence 
             if max(abs(dx)) < tolerance: 
                 break
                 
             #newton update
-            _times += dx / ddX.evaluate(_times)
+            _times += dx / ddX._evaluate(_times)
                 
         #find maximum after dc removal
-        return max(abs(self.evaluate(_times)-self.coeff_dc))
+        return max(abs(self._evaluate(_times)-self.coeff_dc))
 
 
     def spectrum(self):
@@ -359,11 +357,7 @@ class Fourier:
         return all_omegas, cpx_amplitudes 
 
 
-    def fundamental_amplitude(self):
-        return np.sqrt(self.coeffs_cos[0]**2 + self.coeffs_sin[0]**2)
-
-
-    def evaluate(self, t):
+    def _evaluate(self, t):
         result_cos_sin = 0
         for c_cos, c_sin, w in zip(self.coeffs_cos, self.coeffs_sin, self._omegas()):
             result_cos_sin += c_cos * np.cos(w*t) + c_sin * np.sin(w*t)
@@ -392,7 +386,7 @@ if __name__ == "__main__":
     
     import matplotlib.pyplot as plt
 
-    X = Fourier(n=500, omega=1)
+    X = Fourier(n=10, omega=1)
     X[1] = 1
 
     Y = np.sin(X)

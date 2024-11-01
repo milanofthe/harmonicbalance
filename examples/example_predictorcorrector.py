@@ -29,7 +29,7 @@ PCS = PredictorCorrectorSolver(residual_duffing,
                                alpha_end=5, 
                                alpha_step=0.1, 
                                use_jac=False, 
-                               method="krylov")
+                               method="hybr")
 
 #find solutions in range
 PCS.solve()
@@ -43,12 +43,12 @@ specific_solutions = PCS.solve_specific(specific_omega)
 fig, ax = plt.subplots(tight_layout=True)
 
 #solution curve
-ax.plot([s.omega for s in PCS.solutions], [s.amplitude() for s in PCS.solutions], ".-")
+ax.plot([s.omega for s in PCS.solutions], [abs(s) for s in PCS.solutions], ".-")
 
 #specific solution multiples
 ax.axvline(specific_omega, color="k")
 for s in specific_solutions:
-    ax.plot(s.omega, s.amplitude(), "o", color="tab:red")
+    ax.plot(s.omega, abs(s), "o", color="tab:red")
 
 ax.set_xlabel("Omega")
 ax.set_ylabel("Amplitude")

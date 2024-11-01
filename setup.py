@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="harmonicbalance",
-    version="0.1.0",
+    version="0.2.0",
     author="Milan Rother",
     author_email="milan.rother@gmx.de",
     description="Minimalistic framework for calculating nonlinear periodic steady state responses using an object based harmonic balance.",
