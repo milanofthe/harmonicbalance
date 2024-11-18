@@ -37,7 +37,13 @@ X02[0] = x2_dc
 X02[1+n] = 2 #sin component
 
 # Solve
-[X1, X2], _sol = fouriersolve_multi_autonomous_trajectory(residual_volterralotka, [X01, X02], [X01, X02], method="lm", use_jac=True)
+[X1, X2], _sol = fouriersolve_multi_autonomous_trajectory(
+    residual_volterralotka, 
+    [X01, X02], 
+    [X01, X02], 
+    method="lm", 
+    use_jac=True
+    )
 
 print(_sol)
 

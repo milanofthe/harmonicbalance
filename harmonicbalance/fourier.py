@@ -290,18 +290,14 @@ class Fourier:
 
     def _from_time_domain(self, x_t):
 
-        N = len(x_t)
-        coeffs_cexp = np.fft.rfft(x_t)/N
+        #rfft, scaled ny number of time domain samples
+        coeffs_cexp = np.fft.rfft(x_t)/len(x_t)
 
         #convert to real coefficients (cexp -> cos-sin)
-        c_dc = np.real(coeffs_cexp[0])
-        c_cos = 2*np.real(coeffs_cexp[1:self.n+1])
-        c_sin = -2*np.imag(coeffs_cexp[1:self.n+1])
-
         return Fourier(
-            c_dc,
-            c_cos, 
-            c_sin,
+            np.real(coeffs_cexp[0]),
+            2*np.real(coeffs_cexp[1:self.n+1]), 
+            -2*np.imag(coeffs_cexp[1:self.n+1]),
             self.omega,
             self.n
         )

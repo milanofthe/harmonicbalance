@@ -19,7 +19,12 @@ X0[1] = 5  # Fundamental frequency cos term
 
 
 # solve -> minimize residual
-X_sol, _sol = fouriersolve_autonomous(residual_vanderpol, X0, method="lm", use_jac=True)
+X_sol, _sol = fouriersolve_autonomous(
+    residual_vanderpol, 
+    X0, 
+    method="lm", 
+    use_jac=True
+    )
 
 print(_sol)
 

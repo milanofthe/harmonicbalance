@@ -30,8 +30,12 @@ def residual_stickslip(X):
 X0 = U.copy()
 
 # solve -> minimize residual
-# X_sol, _sol = fouriersolve(residual_stickslip, X0, method="lm", use_jac=True)
-X_sol, _sol = fouriersolve(residual_stickslip, X0, method="krylov", use_jac=False)
+X_sol, _sol = fouriersolve(
+    residual_stickslip, 
+    X0, 
+    method="krylov", 
+    use_jac=False
+    )
 
 print(_sol)
 

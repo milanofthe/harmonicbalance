@@ -142,7 +142,8 @@ def fouriersolve_autonomous_trajectory(residual_func, X0, use_jac=False, **solve
     def residual_func_num(params):
         X = Fourier.from_params(params)
         R = residual_func(X)
-        tr = (X-X0).evaluate(0.0)**2 # trajectory
+        dX = X - X0
+        tr = dX(0.0)**2 # trajectory
         return np.append(R.coeffs(), tr)
 
     #numerical jacobian using central differences

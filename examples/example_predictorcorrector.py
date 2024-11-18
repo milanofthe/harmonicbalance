@@ -23,13 +23,15 @@ def residual_duffing(X):
 X0 = U.copy()
 
 #initialize the predictor-corrector solver
-PCS = PredictorCorrectorSolver(residual_duffing, 
-                               X0, 
-                               alpha_start=X0.omega, 
-                               alpha_end=5, 
-                               alpha_step=0.1, 
-                               use_jac=False, 
-                               method="hybr")
+PCS = PredictorCorrectorSolver(
+    residual_duffing, 
+    X0, 
+    alpha_start=X0.omega, 
+    alpha_end=5, 
+    alpha_step=0.1, 
+    use_jac=False, 
+    method="hybr"
+    )
 
 #find solutions in range
 PCS.solve()
