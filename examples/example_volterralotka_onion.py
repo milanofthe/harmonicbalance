@@ -44,7 +44,13 @@ Xr2 = X02.copy()
 solutions = []
 
 #initial solution
-Xs, _sol = fouriersolve_multi_autonomous_trajectory(residual_volterralotka, [X01, X02], [Xr1, Xr2], method="hybr")
+Xs, _sol = fouriersolve_multi_autonomous_trajectory(
+    residual_volterralotka, 
+    [X01, X02], 
+    [Xr1, Xr2], 
+    method="hybr"
+    )
+
 solutions.append(Xs)
 
 for _ in range(10):
@@ -53,7 +59,14 @@ for _ in range(10):
     Xr1[1] += 0.5
 
     #onion solutions
-    Xs, _sol = fouriersolve_multi_autonomous_trajectory(residual_volterralotka, Xs, [Xr1, Xr2], method="hybr", use_jac=True)
+    Xs, _sol = fouriersolve_multi_autonomous_trajectory(
+        residual_volterralotka, 
+        Xs, 
+        [Xr1, Xr2], 
+        method="hybr", 
+        use_jac=True
+        )
+
     solutions.append(Xs)
 
 

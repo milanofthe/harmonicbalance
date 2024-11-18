@@ -60,7 +60,7 @@ x2_values = X2(t_values)
 def ode_volterralotka(x, t):
     return np.array([ alpha*x[0] - beta*x[0]*x[1], - gamma*x[1] + delta*x[0]*x[1]])
 
-solution = odeint(ode_volterralotka, [X01.evaluate(0.0), X02.evaluate(0.0)], t_values, atol=1e-12)
+solution = odeint(ode_volterralotka, [X01(0.0), X02(0.0)], t_values, atol=1e-12)
 x1_ref, x2_ref = solution.T
 
 
@@ -81,7 +81,7 @@ ax.set_ylabel("Response")
 fig, ax = plt.subplots(tight_layout=True)
 ax.plot(x1_dc, x2_dc, ".", label="equilibrium")
 ax.plot(x1_values, x2_values, "-", label="harmonic balance")
-ax.plot(X01.evaluate(t_values), X02.evaluate(t_values), ":", label="linear")
+ax.plot(X01(t_values), X02(t_values), ":", label="linear")
 ax.plot(x1_ref, x2_ref, "--", label="reference")
 ax.axvline(0.0, color="k")
 ax.axhline(0.0, color="k")

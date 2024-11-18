@@ -277,7 +277,8 @@ def fouriersolve_multi_autonomous_trajectory(residual_func, X0s, Xrefs, use_jac=
         Xs = [Fourier.from_coeffs(cs, omega) for cs in np.split(coeffs, nx)]
 
         #residual component of trajectory enforcement
-        tr = sum([(x - xr).evaluate(0.0)**2 for x, xr in zip(Xs, Xrefs)])
+        dXs = [x - xr for x, xr in zip(Xs, Xrefs)]
+        tr = sum([dx(0.0)**2 for dx in dXs])
 
         #residuals as fourier objects
         Rs = residual_func(Xs)
