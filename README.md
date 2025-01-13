@@ -6,6 +6,14 @@ This enables an easy formulation of the residual function of the nonlinear dynam
 
 There are a lot of common examples for nonlinear dynamical systems in the `examples` directory.
 
+## Installation
+
+The latest release version of `harmonicbalance` is available on [PyPi](https://pypi.org/project/harmonicbalance/) and installable via pip:
+
+```console
+$ pip install harmonicbalance
+```
+
 ## The Fourier Class
 
 The heart of this minimalistic framework is the `Fourier` class in `harmonicbalance.fourier`. The class implements the common arithmetic operations such as `__add__`, `__sub__`, `__mul__`, etc. The operations are implemented in such a way that they transform the time domain signal that is represented by a set of fourier coefficiencts. For arbitrary nonlinear operations such as `__pow__`, etc. the signal is constructed in the time domain from the fourier coefficients using numpys efficient `ifft`. There are also a lot of common nonlinearities implemented using a decorator approach so they can be interfaced by numpys ufunc system.
@@ -64,7 +72,7 @@ X0 = U.copy()
 X_sol, _sol = fouriersolve(residual_duffing, X0, method="hybr")
 ```
 
-    runtime of 'fouriersolve' : 8.376600017072633 ms
+    runtime of 'fouriersolve' : 14.000999999552732 ms
     
 
 
@@ -106,7 +114,7 @@ ax.set_ylabel("Response");
 
 
     
-![png](README_files/README_7_0.png)
+![png](README_files/README_8_0.png)
     
 
 
@@ -123,7 +131,7 @@ ax.set_ylabel("v");
 
 
     
-![png](README_files/README_8_0.png)
+![png](README_files/README_9_0.png)
     
 
 
@@ -164,21 +172,18 @@ PCS = PredictorCorrectorSolver(residual_duffing,
 solutions = PCS.solve()
 ```
 
-    runtime of 'fouriersolve' : 4.0203999960795045 ms
-    runtime of 'fouriersolve_arclength' : 7.343000004766509 ms
-    runtime of 'fouriersolve_arclength' : 2.84909998299554 ms
-    runtime of 'fouriersolve_arclength' : 3.654200001619756 ms
-    runtime of 'fouriersolve_arclength' : 2.914099983172491 ms
-    runtime of 'fouriersolve_arclength' : 5.299399985233322 ms
-    runtime of 'fouriersolve_arclength' : 2.90099999983795 ms
+    runtime of 'fouriersolve' : 6.578300000910531 ms
+    runtime of 'fouriersolve_arclength' : 9.709899999506888 ms
+    runtime of 'fouriersolve_arclength' : 5.880299999262206 ms
+    runtime of 'fouriersolve_arclength' : 4.543499999272171 ms
+    runtime of 'fouriersolve_arclength' : 11.443100000178674 ms
+    runtime of 'fouriersolve_arclength' : 7.598599999255384 MS
     ...
-    runtime of 'fouriersolve_arclength' : 3.353200008859858 ms
-    runtime of 'fouriersolve_arclength' : 2.4682999937795103 ms
-    runtime of 'fouriersolve_arclength' : 2.695200004382059 ms
-    runtime of 'fouriersolve_arclength' : 2.4750000156927854 ms
-    runtime of 'fouriersolve_arclength' : 2.465700003085658 ms
-    runtime of 'fouriersolve_arclength' : 2.600799984065816 ms
-    runtime of 'solve' : 671.3208000001032 ms
+    runtime of 'fouriersolve_arclength' : 3.8592000000789994 ms
+    runtime of 'fouriersolve_arclength' : 3.7198999998508953 ms
+    runtime of 'fouriersolve_arclength' : 3.862099998514168 ms
+    runtime of 'fouriersolve_arclength' : 3.725500000655302 ms
+    runtime of 'solve' : 1134.4540999998571 ms
     
 
 
@@ -188,10 +193,10 @@ specific_omega = 3
 specific_solutions = PCS.solve_specific(specific_omega)
 ```
 
-    runtime of 'fouriersolve' : 4.626699985237792 ms
-    runtime of 'fouriersolve' : 3.0014999792911112 ms
-    runtime of 'fouriersolve' : 2.1920999861322343 ms
-    runtime of 'solve_specific' : 12.803199992049485 ms
+    runtime of 'fouriersolve' : 5.057399999714107 ms
+    runtime of 'fouriersolve' : 6.1255999989953125 ms
+    runtime of 'fouriersolve' : 3.5141000007570256 ms
+    runtime of 'solve_specific' : 15.041000000564964 ms
     
 
 
@@ -205,13 +210,35 @@ ax.plot([s.omega for s in PCS.solutions], [s.amplitude() for s in solutions], ".
 #specific solutions
 ax.axvline(specific_omega, color="k")
 for s in specific_solutions:
-    ax.plot(s.omega, s.amplitude(), "o", color="tab:red")
+    ax.plot(s.omega, abs(s), "o", color="tab:red")
 
 ax.set_xlabel("Omega")
 ax.set_ylabel("Amplitude");
 ```
 
 
+    ---------------------------------------------------------------------------
+
+    AttributeError                            Traceback (most recent call last)
+
+    Cell In[9], line 5
+          2 fig, ax = plt.subplots(tight_layout=True, figsize=(8,4), dpi=120)
+          4 #solution curve
+    ----> 5 ax.plot([s.omega for s in PCS.solutions], [s.amplitude() for s in solutions], ".-")
+          7 #specific solutions
+          8 ax.axvline(specific_omega, color="k")
     
-![png](README_files/README_12_0.png)
+
+    AttributeError: 'Fourier' object has no attribute 'amplitude'
+
+
+
     
+![png](README_files/README_13_1.png)
+    
+
+
+
+```python
+
+```
