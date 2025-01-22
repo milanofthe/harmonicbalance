@@ -176,10 +176,7 @@ solutions = PCS.solve()
     runtime of 'fouriersolve_arclength' : 9.709899999506888 ms
     runtime of 'fouriersolve_arclength' : 5.880299999262206 ms
     runtime of 'fouriersolve_arclength' : 4.543499999272171 ms
-    runtime of 'fouriersolve_arclength' : 11.443100000178674 ms
-    runtime of 'fouriersolve_arclength' : 7.598599999255384 MS
     ...
-    runtime of 'fouriersolve_arclength' : 3.8592000000789994 ms
     runtime of 'fouriersolve_arclength' : 3.7198999998508953 ms
     runtime of 'fouriersolve_arclength' : 3.862099998514168 ms
     runtime of 'fouriersolve_arclength' : 3.725500000655302 ms
@@ -205,7 +202,7 @@ specific_solutions = PCS.solve_specific(specific_omega)
 fig, ax = plt.subplots(tight_layout=True, figsize=(8,4), dpi=120)
 
 #solution curve
-ax.plot([s.omega for s in PCS.solutions], [s.amplitude() for s in solutions], ".-")
+ax.plot([s.omega for s in PCS.solutions], [abs(s) for s in solutions], ".-")
 
 #specific solutions
 ax.axvline(specific_omega, color="k")
@@ -217,24 +214,8 @@ ax.set_ylabel("Amplitude");
 ```
 
 
-    ---------------------------------------------------------------------------
-
-    AttributeError                            Traceback (most recent call last)
-
-    Cell In[9], line 5
-          2 fig, ax = plt.subplots(tight_layout=True, figsize=(8,4), dpi=120)
-          4 #solution curve
-    ----> 5 ax.plot([s.omega for s in PCS.solutions], [s.amplitude() for s in solutions], ".-")
-          7 #specific solutions
-          8 ax.axvline(specific_omega, color="k")
     
-
-    AttributeError: 'Fourier' object has no attribute 'amplitude'
-
-
-
-    
-![png](README_files/README_13_1.png)
+![png](README_files/README_13_0.png)
     
 
 
