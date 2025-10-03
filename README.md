@@ -1,225 +1,337 @@
-# Harmonic Balance 
+# Harmonic Balance
 
-This is a minimalistic framework for solving periodic steady state and limit cycles of nonlinear dynamic systems using the alternating frequency-time-domain (AFT) harmonic balance method.
-At the core is a `Fourier` class that represents a fourier series and implements basic operators such as addition, and multiplication as well as general nonlinearities and time domain differentiation.
-This enables an easy formulation of the residual function of the nonlinear dynamics problem.
+[![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-There are a lot of common examples for nonlinear dynamical systems in the `examples` directory.
+A minimalistic, object-oriented framework for solving periodic steady states and limit cycles of nonlinear dynamic systems using the **Alternating Frequency-Time (AFT) Harmonic Balance Method**.
+
+## Features
+
+- 🎯 **Object-oriented design** - Natural problem formulation using the `Fourier` class
+- ⚡ **Efficient computations** - Leverages NumPy's FFT for frequency-time transformations
+- 🔧 **Extensive nonlinearities** - Built-in support for common nonlinear operations
+- 📊 **Solution continuation** - Predictor-corrector methods for bifurcation analysis
+- 🐍 **Modern Python** - Type hints, clean API, Python 3.9+ support
+- 📦 **Minimal dependencies** - Only requires NumPy and SciPy
 
 ## Installation
 
-The latest release version of `harmonicbalance` is available on [PyPi](https://pypi.org/project/harmonicbalance/) and installable via pip:
+### From PyPI (Recommended)
 
 ```console
-$ pip install harmonicbalance
+pip install harmonicbalance
 ```
 
-## The Fourier Class
+### From Source (Latest Development Version)
 
-The heart of this minimalistic framework is the `Fourier` class in `harmonicbalance.fourier`. The class implements the common arithmetic operations such as `__add__`, `__sub__`, `__mul__`, etc. The operations are implemented in such a way that they transform the time domain signal that is represented by a set of fourier coefficiencts. For arbitrary nonlinear operations such as `__pow__`, etc. the signal is constructed in the time domain from the fourier coefficients using numpys efficient `ifft`. There are also a lot of common nonlinearities implemented using a decorator approach so they can be interfaced by numpys ufunc system.
+```console
+git clone https://github.com/milanofthe/harmonicbalance.git
+cd harmonicbalance
+pip install -e .
+```
 
-In short, all the mess of harmonic balance residual function setup and transfer between frequency- and time-domain is naturally handled by the fourier objects.
+### Development Installation
 
-The fourier coefficients are internally present in the real valued configuration with DC, cos and sin components, resulting in a time domain fourier series:
+For development with linting and type checking tools:
+
+```console
+pip install -e ".[dev]"
+```
+
+## Core Concepts
+
+### The Fourier Class
+
+The `Fourier` class is the heart of this framework. It represents a periodic signal using Fourier series coefficients and implements:
+
+- **Arithmetic operations**: Addition, subtraction, multiplication, division
+- **Nonlinear operations**: Powers, trigonometric functions, exponentials, etc.
+- **Differentiation**: Time-domain differentiation via `dt()` method
+- **Automatic domain switching**: Seamless conversion between frequency and time domains
+
+#### Mathematical Representation
+
+Internally, Fourier coefficients are stored in real-valued form (DC, cosine, and sine components):
 
 $$
 x(t) = c_\mathrm{DC} + \sum_{n=1}^N a_n \cos( n \omega t ) + b_n \sin( n \omega t )
 $$
 
+This real representation (as opposed to complex phasors) enables the use of powerful optimizers from `scipy.optimize`.
 
-This real representation (not using complex phasors) allows the use of the powerfull optimizers from the `scipy.optim` library.
+#### Key Features
 
-## Example Duffing Oscillator
-For example, lets solve the steady state of the driven duffing oscillator which is a basic damped oscillator with an additional cubic stiffness ($g$) term.
+- **Operator overloading**: Natural mathematical syntax (`X**3`, `X.sin()`, etc.)
+- **Efficient FFT**: Uses NumPy's `rfft`/`irfft` for frequency-time transformations
+- **NumPy compatibility**: Integrates with NumPy's universal function (ufunc) system
+- **Automatic residual construction**: Complex nonlinear problems become simple expressions
+
+In essence, the `Fourier` class handles all the complexity of harmonic balance residual formulation and domain transformations automatically.
+
+## Quick Start: Duffing Oscillator
+
+Let's solve the steady-state response of the **Duffing oscillator**, a damped oscillator with cubic nonlinearity:
 
 $$
-m \ddot{x} + c \dot{x} + dx + g x^3 = p \cos(\omega_0 t)
+m \ddot{x} + c \dot{x} + d x + g x^3 = p \cos(\omega_0 t)
 $$
 
-In the harmonic balance world, the residual will look like this:
+### Harmonic Balance Formulation
+
+In harmonic balance, we seek a solution where the residual is zero:
 
 $$
-r(x) = m \ddot{x} + c \dot{x} + dx + g x^3 - p \cos(\omega_0 t)
+r(x) = m \ddot{x} + c \dot{x} + d x + g x^3 - p \cos(\omega_0 t) = 0
 $$
 
-When $r$ is zero (or numerically close to zero) we know that $x$ satisfies the duffing ODE and therefore must be a solution. 
-
-
+### Implementation
 
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
+from harmonicbalance import Fourier, fouriersolve
 
-#import the 'Fourier' class and the solver wrapper
-from harmonicbalance.fourier import Fourier
-from harmonicbalance.solvers import fouriersolve
-
-#duffing parameters 
+# Duffing oscillator parameters
 m, c, d, g, p = 1.0, 2.0, 0.3, 1.4, 5.0
 
-#excitation, this is the cos term
-U = Fourier(omega=1, n=5) 
-U[1] = 1 #fundamental frequency cos term
+# Define excitation (cosine term)
+U = Fourier(omega=1, n=5)
+U[1] = 1  # Set fundamental frequency cosine coefficient
 
-#residual for duffing oscillator using the 'Fourier' class
+# Residual function using natural mathematical syntax
 def residual_duffing(X):
-    return  m * X.dt().dt() + c * X.dt() + d * X + g * X**3 - p * U
+    return m * X.dt().dt() + c * X.dt() + d * X + g * X**3 - p * U
 
-#initial guess (just use the excitation)
+# Initial guess
 X0 = U.copy()
 
-# solve -> minimize residual, returns another 'Fourier' object
+# Solve the harmonic balance equations
 X_sol, _sol = fouriersolve(residual_duffing, X0, method="hybr")
 ```
 
-    runtime of 'fouriersolve' : 14.000999999552732 ms
-    
-
-
-```python
-#examine the 'Fourier' object
-print(X_sol)
 ```
 
-    Fourier(coeff_dc=4.66229072966336e-10, coeffs_cos=[ 1.08236692e+00 -1.51914927e-10  4.60358995e-02  3.88449135e-11
-     -1.87784775e-02], coeffs_sin=[-1.15139578e+00  2.06593164e-10 -1.95966475e-01  3.00183167e-11
-     -1.75997843e-02], omega=1, n=5)
-    
+### Visualizing the Solution
 
-The `Fourier` class also implements the `__call__` method for direct time domain evaluation of the fourier series. We can use it to plot the time domain response and the trajectory in the phase space.
-
+The `Fourier` class provides direct time-domain evaluation via the `__call__` method:
 
 ```python
-# Evaluate the solution
+# Evaluate solution in time domain
 t = np.linspace(0, X_sol._T(), 1000)
-x = X_sol(t) 
+x = X_sol(t)
 
-#compute derivative
+# Compute velocity via differentiation
 V_sol = X_sol.dt()
 v = V_sol(t)
+
+# Plot time domain response
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+
+ax1.plot(t, x, label="x(t)")
+ax1.plot(t, v, label="v(t)")
+ax1.set_xlabel("Time")
+ax1.set_ylabel("Response")
+ax1.legend()
+ax1.set_title("Time Domain Response")
+
+# Plot phase portrait
+ax2.plot(x, v)
+ax2.set_xlabel("Displacement x")
+ax2.set_ylabel("Velocity v")
+ax2.set_title("Phase Portrait")
+
+plt.tight_layout()
 ```
 
+**Time Domain Response:**
 
-```python
-# Plot the solution (time domain)
-fig, ax = plt.subplots(tight_layout=True, figsize=(8,4), dpi=120)
-
-ax.plot(t, x, label="x")
-ax.plot(t, v, label="v")
-
-ax.legend()
-ax.set_xlabel("Time")
-ax.set_ylabel("Response");
-```
-
-
-    
 ![png](README_files/README_8_0.png)
-    
 
+**Phase Portrait:**
 
-
-```python
-# Plot the solution (phase diagram)
-fig, ax = plt.subplots(tight_layout=True, figsize=(8,4), dpi=120)
-
-ax.plot(x, v)
-
-ax.set_xlabel("x")
-ax.set_ylabel("v");
-```
-
-
-    
 ![png](README_files/README_9_0.png)
     
 
 
-## Example Predictor-Corrector Solver
+## Advanced: Bifurcation Analysis with Predictor-Corrector
 
-The duffing oscillator is known for its bifurcation, which means that there exist multiple solutions for the same set of parameters. Typically these solutions are hard to find numerically by conventional methods (for example numerical integration). The harmonic balance method can be used to obtain these solutions by continuing the solution curve for a given parameter variation (in this case the excitation frequency $\omega_0$). This results in the well known backbone curve.
+The Duffing oscillator exhibits **bifurcations** — multiple solutions exist for the same parameters. The harmonic balance method excels at finding these solutions through **continuation methods**.
 
-This package also implements a simple `PredictorCorrector` solver that uses the secant method for the predictor step and corrects the solution using the harmonic balance method with an additional constraint (arclength / hypersphere).
+### Backbone Curves
 
+This package includes a `PredictorCorrectorSolver` that:
+- Uses the secant method for prediction
+- Applies arc-length continuation with hypersphere constraints
+- Traces complete solution branches (including unstable ones)
 
+### Example: Frequency Response
 
 ```python
-from harmonicbalance.predictorcorrector import PredictorCorrectorSolver
+from harmonicbalance import Fourier, PredictorCorrectorSolver
 
-#duffing parameters
+# Duffing parameters
 m, c, d, g, p = 1, 0.2, 1, 2, 3
 
-#excitation, this is the cos term
-U = Fourier(omega=1, n=5) 
-U[1] = 1 #fundamental frequency cos term
+# Excitation
+U = Fourier(omega=1, n=5)
+U[1] = 1  # Fundamental frequency cosine coefficient
 
-#residual for duffing oscillator
+# Residual function
 def residual_duffing(X):
     return m * X.dt().dt() + c * X.dt() + d * X + g * X**3 - p * U
 
-#initial guess (just use the excitation)
+# Initial guess
 X0 = U.copy()
 
-#initialize the predictor-corrector solver
-PCS = PredictorCorrectorSolver(residual_duffing, 
-                               X0, 
-                               alpha_start=X0.omega, 
-                               alpha_end=5, 
-                               alpha_step=0.1, 
-                               method="hybr")
+# Initialize predictor-corrector solver
+PCS = PredictorCorrectorSolver(
+    residual_duffing,
+    X0,
+    alpha_start=X0.omega,
+    alpha_end=5,
+    alpha_step=0.1,
+    method="hybr"
+)
 
-#find solutions in specified range
+# Trace the solution branch
 solutions = PCS.solve()
 ```
 
-    runtime of 'fouriersolve' : 6.578300000910531 ms
-    runtime of 'fouriersolve_arclength' : 9.709899999506888 ms
-    runtime of 'fouriersolve_arclength' : 5.880299999262206 ms
-    runtime of 'fouriersolve_arclength' : 4.543499999272171 ms
-    ...
-    runtime of 'fouriersolve_arclength' : 3.7198999998508953 ms
-    runtime of 'fouriersolve_arclength' : 3.862099998514168 ms
-    runtime of 'fouriersolve_arclength' : 3.725500000655302 ms
-    runtime of 'solve' : 1134.4540999998571 ms
-    
+Output (abbreviated):
+```
+runtime of 'fouriersolve' : 7.18 ms
+runtime of 'fouriersolve_arclength' : 12.99 ms
+...
+runtime of 'solve' : 993.4 ms
+```
 
+### Finding Specific Solutions
+
+You can extract solutions at specific frequencies from the traced backbone:
 
 ```python
-#find specific solutions at a given frequency from backbone curve
+# Find specific solutions at a given frequency from backbone curve
 specific_omega = 3
 specific_solutions = PCS.solve_specific(specific_omega)
-```
 
-    runtime of 'fouriersolve' : 5.057399999714107 ms
-    runtime of 'fouriersolve' : 6.1255999989953125 ms
-    runtime of 'fouriersolve' : 3.5141000007570256 ms
-    runtime of 'solve_specific' : 15.041000000564964 ms
-    
+# Plot the backbone curve
+fig, ax = plt.subplots(figsize=(8, 4))
 
+# Solution curve
+ax.plot([s.omega for s in PCS.solutions], [abs(s) for s in solutions], ".-", label="Backbone")
 
-```python
-#plot the solution (phase diagram)
-fig, ax = plt.subplots(tight_layout=True, figsize=(8,4), dpi=120)
-
-#solution curve
-ax.plot([s.omega for s in PCS.solutions], [abs(s) for s in solutions], ".-")
-
-#specific solutions
-ax.axvline(specific_omega, color="k")
+# Specific solutions
+ax.axvline(specific_omega, color="k", linestyle="--", label=f"ω = {specific_omega}")
 for s in specific_solutions:
-    ax.plot(s.omega, abs(s), "o", color="tab:red")
+    ax.plot(s.omega, abs(s), "o", color="tab:red", markersize=8)
 
-ax.set_xlabel("Omega")
-ax.set_ylabel("Amplitude");
+ax.set_xlabel("Frequency (ω)")
+ax.set_ylabel("Amplitude")
+ax.legend()
+plt.tight_layout()
 ```
 
+This produces a frequency-response diagram showing the characteristic S-shaped backbone curve of the Duffing oscillator with its bifurcations.
 
-    
-![png](README_files/README_13_0.png)
-    
+## Available Solvers
 
+The package provides several specialized solvers:
 
+| Solver | Description | Use Case |
+|--------|-------------|----------|
+| `fouriersolve` | Basic harmonic balance solver | Fixed frequency problems |
+| `fouriersolve_autonomous` | Autonomous system solver | Self-excited oscillations, limit cycles |
+| `fouriersolve_autonomous_trajectory` | Trajectory-constrained solver | Specific initial conditions |
+| `fouriersolve_arclength` | Arc-length continuation | Bifurcation tracing, backbone curves |
+| `fouriersolve_ode` | ODE-based solver | Coupled multi-variable systems |
+| `fouriersolve_multi_autonomous_trajectory` | Multi-variable autonomous solver | Coupled limit cycles |
+
+## Examples
+
+The `examples/` directory contains implementations for various nonlinear systems:
+
+- **`example_duffing.py`** - Duffing oscillator (hardening spring)
+- **`example_vanderpol.py`** - Van der Pol oscillator (self-excited)
+- **`example_pendulum.py`** - Nonlinear pendulum
+- **`example_stickslip.py`** - Stick-slip friction oscillator
+- **`example_volterralotka.py`** - Predator-prey dynamics
+- **`example_ode.py`** - Generic ODE systems
+- **`example_predictorcorrector.py`** - Bifurcation analysis
+
+Run any example:
+```console
+python examples/example_duffing.py
+```
+
+## API Reference
+
+### Fourier Class
 
 ```python
+from harmonicbalance import Fourier
 
+# Create a Fourier series with n harmonics
+X = Fourier(coeff_dc=0.0, coeffs_cos=None, coeffs_sin=None, omega=1.0, n=10)
+
+# Access/modify coefficients
+X[0] = 1.0      # DC component
+X[1] = 0.5      # 1st harmonic cosine
+X[n+1] = 0.3    # 1st harmonic sine
+
+# Operations
+Y = X.dt()      # Time derivative
+Z = X**3        # Nonlinear operation
+W = X.sin()     # Trigonometric operation
+
+# Evaluation
+t = np.linspace(0, 2*np.pi, 100)
+x_values = X(t)
+
+# Get spectrum
+omegas, amplitudes = X.spectrum()
 ```
+
+### Solver Functions
+
+All solvers return `(solution, scipy_result)` tuples:
+
+```python
+from harmonicbalance import fouriersolve
+
+X_sol, result = fouriersolve(
+    residual_func,    # Callable[[Fourier], Fourier]
+    X0,               # Initial guess (Fourier object)
+    use_jac=True,     # Use numerical Jacobian
+    method="hybr"     # scipy.optimize.root method
+)
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues or pull requests on [GitHub](https://github.com/milanofthe/harmonicbalance).
+
+## License
+
+MIT License - see LICENSE file for details.
+
+## Citation
+
+If you use this package in your research, please cite:
+
+```bibtex
+@software{harmonicbalance,
+  author = {Rother, Milan},
+  title = {HarmonicBalance: Object-oriented Harmonic Balance Framework},
+  year = {2024},
+  url = {https://github.com/milanofthe/harmonicbalance}
+}
+```
+
+## Acknowledgments
+
+Built with NumPy and SciPy. Inspired by the need for a simple, Pythonic approach to harmonic balance analysis.
+
+---
+
+**Author:** Milan Rother (2024)
+**Repository:** https://github.com/milanofthe/harmonicbalance
